@@ -187,6 +187,7 @@ local function barTooltipShow()
 
   local segment = this.parent.segment
   local value = segment[this.unit]["_sum"]
+  local encountertime = segment[this.unit]["_ctime"]
   local persec = round(segment[this.unit]["_sum"] / segment[this.unit]["_ctime"], 1)
   local wid = this.parent:GetID()
 
@@ -195,6 +196,7 @@ local function barTooltipShow()
   if config[wid].view == 1 or config[wid].view == 2 then
     GameTooltip:AddDoubleLine("|cffffffffDamage", "|cffffffff" .. value)
     GameTooltip:AddDoubleLine("|cffffffffDamage Per Second", "|cffffffff" .. persec)
+    GameTooltip:AddDoubleLine("|cffffffffEncounter", "|cffffffff" .. encountertime)
   elseif config[wid].view == 3 or config[wid].view == 4 then
     local evalue = segment[this.unit]["_esum"]
     local epersec = round(evalue / segment[this.unit]["_ctime"], 1)
