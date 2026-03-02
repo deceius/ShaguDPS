@@ -1,8 +1,8 @@
-## Interface: 11201
+## Interface: 11200
 ## Title: |cffffcc00Shagu|cffffffffDPS
 ## Author: Shagu | forked by Deceius
 ## Notes: A simple and lightweight DPS and damage meter, with few enhancements.
-## Version: 3.0.2d
+## Version: 3.0.3d
 ## OptionalDeps: pfUI
 ## SavedVariablesPerCharacter: ShaguDPS_Config
 

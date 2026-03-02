@@ -182,12 +182,23 @@ local function spairs(t, order)
   end
 end
 
+local function formatTime(seconds)
+    if not seconds or seconds <= 0 then
+        return "00:00"
+    end
+
+    local mins = math.floor(seconds / 60)
+    local secs = math.floor(seconds - (mins * 60))
+
+    return string.format("%02d:%02d", mins, secs)
+end
+
 local function barTooltipShow()
   GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
 
   local segment = this.parent.segment
   local value = segment[this.unit]["_sum"]
-  local encountertime = segment[this.unit]["_ctime"]
+  local encounter = segment[this.unit]["_ctime"]
   local persec = round(segment[this.unit]["_sum"] / segment[this.unit]["_ctime"], 1)
   local wid = this.parent:GetID()
 
@@ -196,7 +207,7 @@ local function barTooltipShow()
   if config[wid].view == 1 or config[wid].view == 2 then
     GameTooltip:AddDoubleLine("|cffffffffDamage", "|cffffffff" .. value)
     GameTooltip:AddDoubleLine("|cffffffffDamage Per Second", "|cffffffff" .. persec)
-    GameTooltip:AddDoubleLine("|cffffffffEncounter", "|cffffffff" .. encountertime)
+    GameTooltip:AddDoubleLine("|cffffffffEncounter", "|cffffffff" .. formatTime(encounter))
   elseif config[wid].view == 3 or config[wid].view == 4 then
     local evalue = segment[this.unit]["_esum"]
     local epersec = round(evalue / segment[this.unit]["_ctime"], 1)
@@ -493,7 +504,7 @@ local function Refresh(self, force, report)
     if config.backdrop == 1 then
       -- window background
       self:SetBackdrop(backdrop_window)
-      self:SetBackdropColor(.5,.5,.5,.5)
+      self:SetBackdropColor(0, 0, 0, 0.5)
 
       -- window border
       self.border:SetBackdrop(backdrop_border)
@@ -706,108 +717,7 @@ local function CreateWindow(wid)
   frame.title:SetPoint("TOPLEFT", 2, -2)
   frame.title:SetPoint("TOPRIGHT", -2, -2)
 
-  frame.btnSegment = CreateFrame("Button", "ShaguDPSDamage", frame)
-  frame.btnSegment:SetPoint("RIGHT", frame.title, "CENTER", -.5, 0)
-  frame.btnSegment:SetFrameStrata("MEDIUM")
-  frame.btnSegment:SetHeight(16)
-  frame.btnSegment:SetWidth(50)
-  frame.btnSegment:SetBackdrop(backdrop)
-  frame.btnSegment:SetBackdropColor(.2,.2,.2,1)
-  frame.btnSegment:SetBackdropBorderColor(.4,.4,.4,1)
-
-  frame.btnSegment.caption = frame.btnSegment:CreateFontString("ShaguDPSTitle", "OVERLAY", "GameFontWhite")
-  frame.btnSegment.caption:SetFont(STANDARD_TEXT_FONT, 9)
-  frame.btnSegment.caption:SetText("Overall")
-  frame.btnSegment.caption:SetAllPoints()
-  frame.btnSegment.tooltip = { "Select Segment", "|cffffffffOverall, Current" }
-  frame.btnSegment:SetScript("OnEnter", btnEnter)
-  frame.btnSegment:SetScript("OnLeave", btnLeave)
-  frame.btnSegment:SetScript("OnClick", function()
-    if frame.btnCurrent:IsShown() then
-      frame.btnDamage:Hide()
-      frame.btnDPS:Hide()
-      frame.btnHeal:Hide()
-      frame.btnHPS:Hide()
-      frame.btnOverall:Hide()
-      frame.btnCurrent:Hide()
-    else
-      frame.btnDamage:Hide()
-      frame.btnDPS:Hide()
-      frame.btnHeal:Hide()
-      frame.btnHPS:Hide()
-      frame.btnOverall:Show()
-      frame.btnCurrent:Show()
-    end
-  end)
-
-  frame.btnMode = CreateFrame("Button", "ShaguDPSDamage", frame)
-  frame.btnMode:SetPoint("LEFT", frame.title, "CENTER", .5, 0)
-  frame.btnMode:SetFrameStrata("MEDIUM")
-  frame.btnMode:SetHeight(16)
-  frame.btnMode:SetWidth(50)
-  frame.btnMode:SetBackdrop(backdrop)
-  frame.btnMode:SetBackdropColor(.2,.2,.2,1)
-  frame.btnMode:SetBackdropBorderColor(.4,.4,.4,1)
-
-  frame.btnMode.caption = frame.btnMode:CreateFontString("ShaguDPSTitle", "OVERLAY", "GameFontWhite")
-  frame.btnMode.caption:SetFont(STANDARD_TEXT_FONT, 9)
-  frame.btnMode.caption:SetText("Mode: Damage")
-  frame.btnMode.caption:SetAllPoints()
-  frame.btnMode.tooltip = { "Select Mode", "|cffffffffDamage, DPS, Heal, HPS" }
-  frame.btnMode:SetScript("OnEnter", btnEnter)
-  frame.btnMode:SetScript("OnLeave", btnLeave)
-  frame.btnMode:SetScript("OnClick", function()
-    if frame.btnDamage:IsShown() then
-      frame.btnDamage:Hide()
-      frame.btnDPS:Hide()
-      frame.btnHeal:Hide()
-      frame.btnHPS:Hide()
-      frame.btnOverall:Hide()
-      frame.btnCurrent:Hide()
-    else
-      frame.btnDamage:Show()
-      frame.btnDPS:Show()
-      frame.btnHeal:Show()
-      frame.btnHPS:Show()
-      frame.btnOverall:Hide()
-      frame.btnCurrent:Hide()
-    end
-  end)
-
-  for name, template in pairs(menubuttons) do
-    frame["btn"..name] = CreateFrame("Button", "ShaguDPS" .. name, frame)
-
-    local button = frame["btn"..name]
-    local template = template
-
-    button:SetPoint("CENTER", frame.title, "CENTER", template[3], -17-template[1]*14)
-    button:SetFrameStrata("HIGH")
-    button:SetHeight(16)
-    button:SetWidth(50)
-    button:SetBackdrop(backdrop)
-    button:SetBackdropColor(.2,.2,.2,1)
-    button:SetBackdropBorderColor(.4,.4,.4,1)
-    button:Hide()
-
-    button.caption = button:CreateFontString("ShaguDPS"..name.."Title", "OVERLAY", "GameFontWhite")
-    button.caption:SetFont(STANDARD_TEXT_FONT, 9)
-    button.caption:SetText(name)
-    button.caption:SetAllPoints()
-    button.tooltip = { template[4], template[5] }
-    button:SetScript("OnEnter", btnEnter)
-    button:SetScript("OnLeave", btnLeave)
-    button:SetScript("OnClick", function()
-      config[frame:GetID()][template[6]] = template[2]
-
-      frame.scroll = 0
-      frame:Refresh(true)
-
-      for button in pairs(menubuttons) do
-        frame["btn"..button]:Hide()
-      end
-    end)
-  end
-
+  
   frame.btnAnnounce = CreateFrame("Button", "ShaguDPSReset", frame)
   frame.btnAnnounce:SetPoint("LEFT", frame.title, "LEFT", 2, 0)
   frame.btnAnnounce:SetFrameStrata("MEDIUM")
@@ -876,6 +786,109 @@ local function CreateWindow(wid)
       ShaguDPS.settings:Show()
     end
   end)
+
+  frame.btnSegment = CreateFrame("Button", "ShaguDPSDamage", frame)
+  frame.btnSegment:SetPoint("LEFT", frame.btnSettings, "RIGHT", 1, 0)
+  frame.btnSegment:SetFrameStrata("MEDIUM")
+  frame.btnSegment:SetHeight(16)
+  frame.btnSegment:SetWidth(50)
+  frame.btnSegment:SetBackdrop(backdrop)
+  frame.btnSegment:SetBackdropColor(.2,.2,.2,1)
+  frame.btnSegment:SetBackdropBorderColor(.4,.4,.4,1)
+
+  frame.btnSegment.caption = frame.btnSegment:CreateFontString("ShaguDPSTitle", "OVERLAY", "GameFontWhite")
+  frame.btnSegment.caption:SetFont(STANDARD_TEXT_FONT, 9)
+  frame.btnSegment.caption:SetText("Overall")
+  frame.btnSegment.caption:SetAllPoints()
+  frame.btnSegment.tooltip = { "Select Segment", "|cffffffffOverall, Current" }
+  frame.btnSegment:SetScript("OnEnter", btnEnter)
+  frame.btnSegment:SetScript("OnLeave", btnLeave)
+  frame.btnSegment:SetScript("OnClick", function()
+    if frame.btnCurrent:IsShown() then
+      frame.btnDamage:Hide()
+      frame.btnDPS:Hide()
+      frame.btnHeal:Hide()
+      frame.btnHPS:Hide()
+      frame.btnOverall:Hide()
+      frame.btnCurrent:Hide()
+    else
+      frame.btnDamage:Hide()
+      frame.btnDPS:Hide()
+      frame.btnHeal:Hide()
+      frame.btnHPS:Hide()
+      frame.btnOverall:Show()
+      frame.btnCurrent:Show()
+    end
+  end)
+
+  frame.btnMode = CreateFrame("Button", "ShaguDPSDamage", frame)
+  frame.btnMode:SetPoint("LEFT", frame.btnSegment, "RIGHT", 1, 0)
+  frame.btnMode:SetFrameStrata("MEDIUM")
+  frame.btnMode:SetHeight(16)
+  frame.btnMode:SetWidth(50)
+  frame.btnMode:SetBackdrop(backdrop)
+  frame.btnMode:SetBackdropColor(.2,.2,.2,1)
+  frame.btnMode:SetBackdropBorderColor(.4,.4,.4,1)
+
+  frame.btnMode.caption = frame.btnMode:CreateFontString("ShaguDPSTitle", "OVERLAY", "GameFontWhite")
+  frame.btnMode.caption:SetFont(STANDARD_TEXT_FONT, 9)
+  frame.btnMode.caption:SetText("Mode: Damage")
+  frame.btnMode.caption:SetAllPoints()
+  frame.btnMode.tooltip = { "Select Mode", "|cffffffffDamage, DPS, Heal, HPS" }
+  frame.btnMode:SetScript("OnEnter", btnEnter)
+  frame.btnMode:SetScript("OnLeave", btnLeave)
+  frame.btnMode:SetScript("OnClick", function()
+    if frame.btnDamage:IsShown() then
+      frame.btnDamage:Hide()
+      frame.btnDPS:Hide()
+      frame.btnHeal:Hide()
+      frame.btnHPS:Hide()
+      frame.btnOverall:Hide()
+      frame.btnCurrent:Hide()
+    else
+      frame.btnDamage:Show()
+      frame.btnDPS:Show()
+      frame.btnHeal:Show()
+      frame.btnHPS:Show()
+      frame.btnOverall:Hide()
+      frame.btnCurrent:Hide()
+    end
+  end)
+
+  for name, template in pairs(menubuttons) do
+    frame["btn"..name] = CreateFrame("Button", "ShaguDPS" .. name, frame)
+
+    local button = frame["btn"..name]
+    local template = template
+
+    button:SetPoint("LEFT", frame.btnSegment, "CENTER", template[3], -17-template[1]*14)
+    button:SetFrameStrata("HIGH")
+    button:SetHeight(16)
+    button:SetWidth(50)
+    button:SetBackdrop(backdrop)
+    button:SetBackdropColor(.2,.2,.2,1)
+    button:SetBackdropBorderColor(.4,.4,.4,1)
+    button:Hide()
+
+    button.caption = button:CreateFontString("ShaguDPS"..name.."Title", "OVERLAY", "GameFontWhite")
+    button.caption:SetFont(STANDARD_TEXT_FONT, 9)
+    button.caption:SetText(name)
+    button.caption:SetAllPoints()
+    button.tooltip = { template[4], template[5] }
+    button:SetScript("OnEnter", btnEnter)
+    button:SetScript("OnLeave", btnLeave)
+    button:SetScript("OnClick", function()
+      config[frame:GetID()][template[6]] = template[2]
+
+      frame.scroll = 0
+      frame:Refresh(true)
+
+      for button in pairs(menubuttons) do
+        frame["btn"..button]:Hide()
+      end
+    end)
+  end
+
 
   frame.btnReset = CreateFrame("Button", "ShaguDPSReset", frame)
   frame.btnReset:SetPoint("RIGHT", frame.title, "RIGHT", -2, 0)
