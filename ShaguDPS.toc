@@ -1,5 +1,5 @@
 ## Interface: 11200
-## Title: |cffffcc00Shagu|cffffffffDPS
+## Title: |cff7fff7f [D]|r |cffffcc00Shagu|cffffffffDPS
 ## Author: Shagu | forked by Deceius
 ## Notes: A simple and lightweight DPS and damage meter, with few enhancements.
 ## Version: 3.0.3d
